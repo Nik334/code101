@@ -217,6 +217,26 @@ const handleEditSubmit = async () => {
   }
 }
 
+const deleteCampaign = async () => {
+  const userStore = useUserStore();
+  
+  // Ensure the token is available from the user store
+  const token = userStore.token;
+    if (!token) {
+      throw new Error('Authorization token is missing');
+    }
+
+    // Send the HTTP DELETE request
+    await axios.delete(`http://localhost:5000/campaigns/${props.campaign.id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    emit('campaign-fetch');
+    console.log('Campaign delete successfully');
+}
+
 const updateCampaign = async () => {
   const userStore = useUserStore();
   
