@@ -11,14 +11,14 @@
       <div>
         <!-- Show Edit and Delete buttons only if the status is 'Requested' -->
         <button 
-          v-if="campaign.campaign_status === 'Requested'"
+          v-if="campaign.campaign_status === 'Pending'"
           @click="openEditModal" 
           class="btn btn-primary m-2"
         >
           <PencilSharp class="edit-icon" />
         </button>
         <button 
-          v-if="campaign.campaign_status === 'Requested'"
+          v-if="campaign.campaign_status === 'Pending'"
           @click="deleteCampaign(campaign.id)" 
           class="btn btn-danger"
         >
@@ -34,6 +34,7 @@
       <h5 class="card-title">
         <strong>Campaign Title: {{ campaign.campaign_name }} </strong>
       </h5>
+      <p class="card-text"> Influencer name: {{ campaign.influencer.name }}</p>
       <p class="card-text"> Budget: {{ campaign.campaign_budget }} INR</p>
       <p class="card-text">
         Description: {{ campaign.campaign_desc }} 

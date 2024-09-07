@@ -80,6 +80,7 @@ def get_public_influencer_campaigns():
         influencer_bio_id = influencer_bio.id
         campaigns = Campaigns.query.filter_by(
             campaign_visibility='private',
+            flagged=False,
             influencer_id=influencer_bio_id  # Match influencer_bio.id with influencer_id in the campaigns
         ).all()
         if campaigns:
@@ -239,8 +240,14 @@ def get_my_campaigns():
         sponsor = SponsorBio.query.filter_by(
             user_id=get_jwt_identity()['user_id']).first()
         if sponsor:
-            campaigns = Campaigns.query.filter_by(sponsor_id=sponsor.id).all()
-            return jsonify([campaign.serialize() for campaign in campaigns]), 200
+            campaigns = db.session.query(Campaigns, InfluencerBio).join(InfluencerBio, Campaigns.influencer_id == InfluencerBio.id).filter(Campaigns.sponsor_id == sponsor.id).all()
+            result = []
+            for campaign, influencer in campaigns:
+                campaign = campaign.serialize()  # Assuming Campaign model has a serialize method
+                influencer_data = influencer.serialize()  # Assuming Influencer model has a serialize method
+                campaign['influencer'] = influencer_data  # Add influencer data to each campaign
+                result.append(campaign)
+            return jsonify(result), 200
         else:
             return jsonify({'message': 'Sponsor User does not exist'}), 404
     except Exception as e:
@@ -278,6 +285,21 @@ def flag_campaign(id):
             campaign.flagged = True
             db.session.commit()
             return jsonify({'message': 'Campaign flagged'}), 200
+        else:
+            return jsonify({'message': 'Campaign does not exist'}), 404
+    except Exception as e:
+        print(e)
+        return jsonify({'message': 'Something went wrong'}), 500
+    
+@app.route('/unflag-campaign/<int:id>', methods=['PUT'])
+@admin_required
+def unflag_campaign(id):
+    try:
+        campaign = Campaigns.query.filter_by(id=id).first()
+        if campaign:
+            campaign.flagged = False
+            db.session.commit()
+            return jsonify({'message': 'Campaign unflagged'}), 200
         else:
             return jsonify({'message': 'Campaign does not exist'}), 404
     except Exception as e:

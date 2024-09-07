@@ -10,8 +10,9 @@
         <div v-for="campaign in campaigns" :key="campaign.id" class="campaign-card-wrapper">
           <CampaignCard
             :campaign="campaign"
-            @flag-campaign="fetchFlaggedCampaigns"
-            @request-campaign="fetchCampaigns"
+            @request-campaign="fetchall"
+            :admin="true"
+            :flagged="false"
           />
         </div>
       </div>
@@ -22,22 +23,12 @@
       </div>
       <div class="campaign-grid">
         <div v-for="campaign in flaggedCampaigns" :key="campaign.id" class="campaign-card-wrapper">
-          <div class="card text-center campaign-card border-bottle-green">
-            <div class="card-header bg-bottle-green text-white">
-              {{ campaign.campaign_visibility }}
-            </div>
-            <div class="card-body">
-              <h5 class="card-title text-black">
-                {{ campaign.campaign_name }} - INR {{ campaign.campaign_budget }}
-              </h5>
-              <p class="card-text text-secondary">
-                {{ campaign.campaign_desc }}
-              </p>
-            </div>
-            <div class="card-footer text-muted">
-              {{ campaign.campaign_start }} - {{ campaign.campaign_end }}
-            </div>
-          </div>
+          <CampaignCard
+            :campaign="campaign"
+            @request-campaign="fetchall"
+            :admin="true"
+            :flagged="true"
+          />
         </div>
       </div>
     </div>
@@ -59,6 +50,11 @@ const { token, username } = storeToRefs(userStore)
 
 const campaigns = ref([])
 const flaggedCampaigns = ref([])
+
+const fetchall = async () => {
+  await fetchFlaggedCampaigns()
+  await fetchCampaigns()
+}
 
 const fetchFlaggedCampaigns = async () => {
   try {

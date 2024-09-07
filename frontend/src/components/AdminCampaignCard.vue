@@ -8,12 +8,20 @@
       <p class="visibility-label">
         <strong>Visibility:</strong> {{ campaign.campaign_visibility }}
       </p>
-      <div>
+      <div v-if="!admin">
         <button @click="o" class="btn btn-primary m-2">
           <PencilSharp class="edit-icon" />
         </button>
         <button @click="deleteCampaign(campaign.id)" class="btn btn-danger">
           <TrashOutline class="delete-icon" />
+        </button>
+      </div>
+      <div v-else>
+        <button v-if="!flagged" @click="setFlag()" class="btn btn-danger m-2">
+          Flag
+        </button>
+        <button v-else @click="setUnFlag()" class="btn btn-primary">
+          Unflagged
         </button>
       </div>
     </header>
@@ -102,6 +110,7 @@ import '../assets/campaign-card.css';
 import { PencilSharp, TrashOutline, CloseOutline, GlobeOutline, LockClosedOutline } from '@vicons/ionicons5'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user';
+import { storeToRefs } from 'pinia'
 
 // Convert timestamp to YYYY-MM-DD format
 const formatDate = (timestamp) => {
@@ -112,7 +121,9 @@ const formatDate = (timestamp) => {
 
 const props = defineProps({
   campaign: Object,
-  influencers: Array // List of influencers passed as a prop
+  influencers: Array,  // List of influencers passed as a prop
+  admin: Boolean,
+  flagged: Boolean
 })
 
 const open = ref(false)
@@ -129,6 +140,10 @@ const editInfluencer = ref(props.campaign.influencer_id) // Prepopulate with cur
 const editGoal = ref(props.campaign.campaign_goal)
 const emit = defineEmits(['campaign-fetch'])
 const handleError = ref(null) // This should be a ref holding error messages
+
+// Access the user store
+const userStore = useUserStore()
+const { token } = storeToRefs(userStore)
 
 const openEditModal = () => {
   open.value = true
@@ -169,7 +184,6 @@ const handleEditSubmit = async () => {
 }
 
 const updateCampaign = async () => {
-  const userStore = useUserStore();
   
   try {
     // Prepare the payload including influencer ID
@@ -186,24 +200,53 @@ const updateCampaign = async () => {
 
     console.log("Campaign after changes:", payload)
 
-    const token = userStore.token;
     if (!token) {
       throw new Error('Authorization token is missing');
     }
 
     await axios.put(`http://localhost:5000/campaigns/${props.campaign.id}`, payload, {
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token.value}`
       }
     });
 
-    emit('campaign-fetch');
+    emit('request-campaign');
     console.log('Campaign updated successfully');
   } catch (error) {
     console.error('Failed to update campaign:', error);
     handleError.value = 'Failed to update campaign: ' + error.message // Set error message here
   }
 };
+
+const setFlag = async () => {
+  // console.log("userStore.token", token);
+  try {
+    const response = await axios.put(`http://localhost:5000/flag-campaign/${props.campaign.id}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token.value}`
+      }
+    });
+    emit('request-campaign');
+  } catch (error) {
+    console.error('Failed to fetch influencers:', error);
+    handleError.value = 'Failed to fetch influencers: ' + error.message // Set error message here
+  }
+}
+
+const setUnFlag = async () => {
+  // console.log("userStore.token", token);
+  try {
+    const response = await axios.put(`http://localhost:5000/unflag-campaign/${props.campaign.id}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token.value}`
+      }
+    });
+    emit('request-campaign');
+  } catch (error) {
+    console.error('Failed to fetch influencers:', error);
+    handleError.value = 'Failed to fetch influencers: ' + error.message // Set error message here
+  }
+}
 
 onMounted(() => {
   fetchInfluencers(); // Fetch influencers on mount
