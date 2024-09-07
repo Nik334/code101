@@ -1,78 +1,113 @@
 <template>
   <div class="container mt-5">
-    <div class="card border-0 shadow-lg p-5">
-      <div class="box">
-        <h3 class="text-center text-bottle-green mb-4"  style="display:flex;"> Welcome &nbsp; <strong> {{ username }} </strong>
-        <sup>
-        <button @click="showModal" class="edit-profile-btn">
-            <svg class="edit-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9"></path>
-              <path d="M16.24 4.76a3 3 0 0 1 4.24 4.24L7 21H3v-4L16.24 4.76z"></path>
-            </svg>
-          </button>
-        </sup>
+    <div class="card border-0 shadow-lg p-4 p-md-5">
+      <!-- Welcome Section -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class=" text-bottle-green mb-0">
+          Welcome, <strong>{{ userData.username }}</strong>
         </h3>
-        <div>
-            
-          <button @click="exportCampaignData" class="export-btn">
-            Export Data
-          </button>
-          
+        <button @click="showModal" class="edit-profile-btn">
+          <svg class="edit-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.24 4.76a3 3 0 0 1 4.24 4.24L7 21H3v-4L16.24 4.76z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- User Information Card -->
+      <div v-if="userData" class="card mb-4">
+        <div class="card-body">
+          <div class="user-info">
+            <div class="info-item">
+              <i class="fa fa-envelope info-icon"></i>
+              <p><strong>Email:</strong> {{ userData.email }}</p>
+            </div>
+            <div class="info-item">
+              <i class="fa fa-user info-icon"></i>
+              <p><strong>Role:</strong> {{ userData.user_type }}</p>
+            </div>
+            <!-- Display Sponsor Bio -->
+            <div v-if="userData.user_type === 'sponsor' && userData.sponsor_bio" class="bio-info">
+              <div class="info-item">
+                <i class="fa fa-id-card info-icon"></i>
+                <p><strong>Name:</strong> {{ userData.sponsor_bio.name }}</p>
+              </div>
+              <div class="info-item">
+                <i class="fa fa-industry info-icon"></i>
+                <p><strong>Industry:</strong> {{ userData.sponsor_bio.industry }}</p>
+              </div>
+              <div class="info-item">
+                <i class="fa fa-dollar-sign info-icon"></i>
+                <p><strong>Budget:</strong> {{ userData.sponsor_bio.budget }}</p>
+              </div>
+              <div class="info-item">
+                <i class="fa fa-check-circle info-icon"></i>
+                <p><strong>Approved:</strong> {{ userData.sponsor_bio.approved ? 'Yes' : 'No' }}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <p class="text-center text-light">Here is your dashboard</p>
-      <RouterView />
 
-      <!-- Modal for editing profile -->
-      <div v-if="isModalVisible" class="modal-overlay">
-        <div class="modal-content">
-          <div class="card custom-card">
-            <div class="card-header">
-              <h5 class="card-title">Update Profile</h5>
-            </div>
-            <div class="card-body">
-              <form @submit.prevent="handleProfileUpdate">
-                <div class="mb-3">
-                  <label for="InputUsername" class="form-label">Username</label>
-                  <input
-                    type="text"
-                    v-model="userData.username"
-                    class="form-control"
-                    id="InputUsername"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="currentPassword" class="form-label">Current Password</label>
-                  <input
-                    type="password"
-                    v-model="userData.currentPassword"
-                    class="form-control"
-                    id="currentPassword"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="newPassword" class="form-label">New Password</label>
-                  <input
-                    type="password"
-                    v-model="userData.newPassword"
-                    class="form-control"
-                    id="newPassword"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="confirmPassword" class="form-label">Confirm Password</label>
-                  <input
-                    type="password"
-                    v-model="userData.confirmPassword"
-                    class="form-control"
-                    id="confirmPassword"
-                  />
-                </div>
-                <p v-if="isErrored" class="error-text">{{ error }}</p>
+      <div class="text-right">
+        <button @click="exportCampaignData" class="export-btn">
+          Export Data
+        </button>
+      </div>
+    </div>
+    <RouterView />
+
+    <!-- Modal for Editing Profile -->
+    <div v-if="isModalVisible" class="modal-overlay">
+      <div class="modal-content">
+        <div class="card custom-card">
+          <div class="card-header">
+            <h5 class="card-title">Update Profile</h5>
+          </div>
+          <div class="card-body">
+            <form @submit.prevent="handleProfileUpdate">
+              <div class="mb-3">
+                <label for="InputUsername" class="form-label">Username</label>
+                <input
+                  type="text"
+                  v-model="userData.username"
+                  class="form-control"
+                  id="InputUsername"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="currentPassword" class="form-label">Current Password</label>
+                <input
+                  type="password"
+                  v-model="userData.currentPassword"
+                  class="form-control"
+                  id="currentPassword"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="newPassword" class="form-label">New Password</label>
+                <input
+                  type="password"
+                  v-model="userData.newPassword"
+                  class="form-control"
+                  id="newPassword"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input
+                  type="password"
+                  v-model="userData.confirmPassword"
+                  class="form-control"
+                  id="confirmPassword"
+                />
+              </div>
+              <p v-if="isErrored" class="error-text">{{ error }}</p>
+              <div class="d-flex justify-content-between">
                 <button type="submit" class="btn btn-primary">Update</button>
                 <button type="button" class="btn btn-secondary" @click="closeModal">Cancel</button>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -81,21 +116,22 @@
 </template>
 
 <script setup>
-import router from '@/router';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
-import Toast from 'vue-toastification';
-import 'vue-toastification/dist/index.css';
+import { useRouter } from 'vue-router';
+import '../assets/SponsorDashboard.css';
 
-
+const router = useRouter();
 const userStore = useUserStore();
 const { token } = storeToRefs(userStore);
 
-const username = ref('');
 const userData = ref({
   username: '',
+  email: '',
+  user_type: '',
+  sponsor_bio: null,
   currentPassword: '',
   newPassword: '',
   confirmPassword: ''
@@ -115,13 +151,14 @@ onMounted(() => {
 const getUserProfile = async () => {
   try {
     const response = await axios.get('http://localhost:5000/current_user', {
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
+      headers: { Authorization: `Bearer ${token.value}` }
     });
 
-    username.value = response.data?.user?.username;
-    userData.value.username = response.data?.user?.username;
+    const user = response.data?.user;
+    userData.value = {
+      ...user,
+      sponsor_bio: user.user_type === 'sponsor' ? user.sponsor_bio : null
+    };
   } catch (error) {
     console.error('Failed to fetch user profile:', error);
   }
@@ -130,9 +167,7 @@ const getUserProfile = async () => {
 const exportCampaignData = async () => {
   try {
     await axios.get('http://localhost:5000/export-campaigns', {
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
+      headers: { Authorization: `Bearer ${token.value}` }
     });
     alert('Data exported successfully');
   } catch (error) {
@@ -158,12 +193,10 @@ const handleProfileUpdate = async () => {
         username: userData.value.username,
         current_password: userData.value.currentPassword,
         new_password: userData.value.newPassword,
-        confirm_password: userData.value.confirmPassword,
+        confirm_password: userData.value.confirmPassword
       },
       {
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
+        headers: { Authorization: `Bearer ${token.value}` }
       }
     );
 
@@ -178,138 +211,8 @@ const handleProfileUpdate = async () => {
     getUserProfile(); // Refresh profile data after update
   } catch (err) {
     console.error('An error occurred:', err);
-    error.value =
-      err.response?.data?.message ||
-      'An error occurred. Please try again later.';
+    error.value = err.response?.data?.message || 'An error occurred. Please try again later.';
     isErrored.value = true;
   }
 };
 </script>
-
-
-<style lang="scss" scoped>
-.container {
-  max-width: 800px;
-}
-
-.card {
-  border-radius: 15px;
-  background-color: #f8f9fa; /* Light background color */
-  color: #000; /* Text color */
-}
-
-.text-bottle-green {
-  color: #006a4e; /* Bottle green color */
-}
-
-h1 {
-  font-size: 2.5rem;
-  font-weight: bold;
-}
-
-p {
-  font-size: 1.2rem;
-}
-
-.box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.export-btn {
-  border: solid 1px #006a4e; /* Bottle green border */
-  border-radius: 5px;
-  background-color: white;
-  padding: 10px 15px;
-  color: #006a4e; /* Bottle green text */
-  outline: none;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.export-btn:hover {
-  background-color: #006a4e;
-  color: white;
-}
-
-.edit-profile-btn {
-  border: none;
-  background-color: transparent;
-  color: #006a4e; /* Bottle green color */
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 10px 15px;
-  transition: color 0.3s;
-}
-
-.edit-profile-btn:hover {
-  color: #004a39; /* Darker bottle green */
-}
-
-.edit-icon {
-  margin-right: 5px;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 500px;
-  width: 100%;
-}
-
-/* Custom styles for the profile update card */
-.card.custom-card {
-  background-color: #006a4e; /* Bottle green background color */
-  border: 2px solid black; /* Black border */
-  color: white; /* Ensure text is readable */
-}
-
-.card-header {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.card-header .card-title {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.card.custom-card .form-control,
-.card.custom-card .form-select {
-  background-color: white; /* Keep input fields white */
-  color: black; /* Black text color in input fields */
-}
-
-.card.custom-card .form-label {
-  color: white; /* White text for labels */
-}
-
-.card.custom-card .btn-primary {
-  background-color: black; /* Black button background */
-  border-color: black; /* Black button border */
-}
-
-.card.custom-card .btn-primary:hover {
-  background-color: #333; /* Darker shade for hover */
-}
-
-.error-text {
-  color: red; /* Error text styling */
-}
-</style>

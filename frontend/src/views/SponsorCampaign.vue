@@ -230,7 +230,7 @@ const handleSubmit = async () => {
         end_date: endDate.value,
         visibility: visibility.value ? 'public' : 'private',
         goal: goal.value,
-        influencer_id: !visibility.value ? selectedInfluencer.value : null
+        influencer_id: !visibility.value ? selectedInfluencer.value : 0
       },
       {
         headers: {
@@ -279,51 +279,3 @@ onMounted(() => {
   }
 })
 </script>
-
-<style scoped>
-.campaign-container {
-  padding: 1rem;
-  background-color: #f8f9fa;
-}
-
-.add-campaign-btn {
-  background-color: #006a4e;
-  border: none;
-  color: white;
-  font-weight: bold;
-  box-shadow: 0 0.25rem 0.9375rem rgba(0, 106, 78, 0.5);
-  transition: transform 0.2s;
-}
-
-.add-campaign-btn:hover {
-  transform: scale(1.05);
-  background-color: #004d3a;
-}
-
-.offcanvas-header {
-  background-color: #006a4e;
-  color: white;
-}
-
-.offcanvas-body {
-  background-color: #ffffff;
-  padding: 1.25rem;
-  border-radius: 0.9375rem;
-  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.1);
-}
-
-.form-control {
-  border-radius: 0.625rem;
-}
-
-.btn-primary {
-  background-color: #006a4e;
-  border: none;
-  box-shadow: 0 0.25rem 0.625rem rgba(0, 106, 78, 0.3);
-  transition: background-color 0.2s;
-}
-
-.btn-primary:hover {
-  background-color: #004d3a;
-}
-</style>

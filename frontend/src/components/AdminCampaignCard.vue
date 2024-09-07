@@ -9,36 +9,21 @@
         <strong>Visibility:</strong> {{ campaign.campaign_visibility }}
       </p>
       <div>
-        <!-- Show Edit and Delete buttons only if the status is 'Requested' -->
-        <button 
-          v-if="campaign.campaign_status === 'Requested'"
-          @click="openEditModal" 
-          class="btn btn-primary m-2"
-        >
+        <button @click="o" class="btn btn-primary m-2">
           <PencilSharp class="edit-icon" />
         </button>
-        <button 
-          v-if="campaign.campaign_status === 'Requested'"
-          @click="deleteCampaign(campaign.id)" 
-          class="btn btn-danger"
-        >
+        <button @click="deleteCampaign(campaign.id)" class="btn btn-danger">
           <TrashOutline class="delete-icon" />
-        </button>
-        <!-- Always show the 'View' button -->
-        <button @click="viewCampaign(campaign.id)" class="btn btn-info">
-          View
         </button>
       </div>
     </header>
     <main class="card-body">
       <h5 class="card-title">
-        <strong>Campaign Title: {{ campaign.campaign_name }} </strong>
+        <strong>Campaign Title: {{ campaign.campaign_name }} - INR {{ campaign.campaign_budget }}</strong>
       </h5>
-      <p class="card-text"> Budget: {{ campaign.campaign_budget }} INR</p>
       <p class="card-text">
-        Description: {{ campaign.campaign_desc }} 
+        <strong>Description:</strong> {{ campaign.campaign_desc }}
       </p>
-      <p class="card-text">Status: {{ campaign.campaign_status }}</p>
     </main>
     <footer class="card-footer">
       <div>
@@ -88,8 +73,8 @@
                 <input class="form-check-input" type="checkbox" v-model="editVisibility" id="editVisibility" />
               </div>
 
-              <!-- Influencer Dropdown (only visible if private) -->
-              <div v-if="!editVisibility" class="mb-3">
+              <!-- Influencer Dropdown -->
+              <div class="mb-3">
                 <label for="editInfluencer" class="form-label">Select Influencer</label>
                 <select v-model="editInfluencer" class="form-select" id="editInfluencer">
                   <option v-for="influencer in influencers" :key="influencer.id" :value="influencer.id">
@@ -108,33 +93,8 @@
         </div>
       </div>
     </transition>
-
-    <!-- View Modal for displaying campaign details -->
-    <transition name="fade">
-      <div v-if="viewOpen" class="modal-overlay" @click.self="closeViewModal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Campaign Details</h5>
-            <button type="button" class="btn-close" @click="closeViewModal">
-              <CloseIcon class="close-icon" />
-            </button>
-          </div>
-          <div class="modal-body">
-            <p><strong>Campaign Name:</strong> {{ viewCampaignData.campaign_name }}</p>
-            <p><strong>Budget:</strong> INR {{ viewCampaignData.campaign_budget }}</p>
-            <p><strong>Description:</strong> {{ viewCampaignData.campaign_desc }}</p>
-            <p><strong>Start Date:</strong> {{ formatDate(viewCampaignData.campaign_start) }}</p>
-            <p><strong>End Date:</strong> {{ formatDate(viewCampaignData.campaign_end) }}</p>
-            <p><strong>Influencer:</strong> {{ viewCampaignData.influencer?.name || 'N/A' }}</p>
-            <p><strong>Goal:</strong> {{ viewCampaignData.campaign_goal }}</p>
-            <p><strong>Status:</strong> {{ viewCampaignData.campaign_status }}</p> <!-- Display status here -->
-          </div>
-        </div>
-      </div>
-    </transition>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import '../assets/campaign-card.css';
@@ -169,8 +129,6 @@ const editInfluencer = ref(props.campaign.influencer_id) // Prepopulate with cur
 const editGoal = ref(props.campaign.campaign_goal)
 const emit = defineEmits(['campaign-fetch'])
 const handleError = ref(null) // This should be a ref holding error messages
-const viewOpen = ref(false) // Modal state for view
-const viewCampaignData = ref({}) // Data for the campaign being viewed
 
 const openEditModal = () => {
   open.value = true
@@ -180,13 +138,6 @@ const closeEditModal = () => {
   open.value = false
 }
 
-const openViewModal = () => {
-  open.value = true
-}
-
-const closeViewModal = () => {
-  viewOpen.value = false
-}
 const validateDates = () => {
   if (editStartDate.value && editEndDate.value) {
     if (new Date(editStartDate.value) > new Date(editEndDate.value)) {
@@ -254,23 +205,6 @@ const updateCampaign = async () => {
   }
 };
 
-// Fetch campaign details when "View" button is clicked
-const viewCampaign = async (id) => {
-  const userStore = useUserStore()
-  const token = userStore.token
-  try {
-    const response = await axios.get(`http://localhost:5000/campaigns/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    viewCampaignData.value = response.data
-    viewOpen.value = true // Open the view modal
-  } catch (error) {
-    console.error('Failed to fetch campaign:', error)
-  }
-}
-
 onMounted(() => {
   fetchInfluencers(); // Fetch influencers on mount
 })
@@ -302,4 +236,3 @@ watch(() => props.campaign, (newVal) => {
   editGoal.value = newVal.campaign_goal
 }, { deep: true })
 </script>
-

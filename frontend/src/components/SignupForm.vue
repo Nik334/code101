@@ -29,12 +29,13 @@
         </div>
         <div class="mb-3">
           <label for="InputRole" class="form-label">Role</label>
-          <select class="form-select" v-model="user_role" id="InputRole" aria-label="user type">
-            <option selected>Select Role</option>
+          <select class="form-select" v-model="user_role" id="InputRole" aria-label="User Role">
+            <option value="" disabled selected>Select Role</option>
             <option value="sponsor">Sponsor</option>
             <option value="influencer">Influencer</option>
           </select>
         </div>
+
         <template v-if="user_role === 'sponsor'">
           <div class="mb-3">
             <label for="InputIndustry" class="form-label">Industry</label>
@@ -42,7 +43,7 @@
           </div>
           <div class="mb-3">
             <label for="InputBudget" class="form-label">Budget</label>
-            <input type="number" v-model="budget" class="form-control" id="InputBudget" />
+            <input type="number" v-model="budget" class="form-control" id="InputBudget" min="0"/>
           </div>
         </template>
         <template v-if="user_role === 'influencer'">

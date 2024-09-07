@@ -1,51 +1,45 @@
 <template>
-  <div class="card campaign-card m-1">
-    <header class="card-header bg-bottle-green">
-      <div class="visibility-icon">
-        <PublicIcon v-if="campaign.campaign_visibility === 'public'" />
-        <PrivateIcon v-else />
-      </div>
-      <p class="visibility-label">
-        <strong>Visibility:</strong> {{ campaign.campaign_visibility }}
-      </p>
-      <div>
-        <!-- Show Edit and Delete buttons only if the status is 'Requested' -->
-        <button 
-          v-if="campaign.campaign_status === 'Requested'"
-          @click="openEditModal" 
-          class="btn btn-primary m-2"
-        >
-          <PencilSharp class="edit-icon" />
-        </button>
-        <button 
-          v-if="campaign.campaign_status === 'Requested'"
-          @click="deleteCampaign(campaign.id)" 
-          class="btn btn-danger"
-        >
-          <TrashOutline class="delete-icon" />
-        </button>
-        <!-- Always show the 'View' button -->
-        <button @click="viewCampaign(campaign.id)" class="btn btn-info">
-          View
-        </button>
-      </div>
-    </header>
-    <main class="card-body">
-      <h5 class="card-title">
-        <strong>Campaign Title: {{ campaign.campaign_name }} </strong>
-      </h5>
-      <p class="card-text"> Budget: {{ campaign.campaign_budget }} INR</p>
-      <p class="card-text">
-        Description: {{ campaign.campaign_desc }} 
-      </p>
-      <p class="card-text">Status: {{ campaign.campaign_status }}</p>
-    </main>
-    <footer class="card-footer">
-      <div>
-        <strong>Start Date:</strong> {{ formatDate(campaign.campaign_start) }}
-        <strong>End Date:</strong> {{ formatDate(campaign.campaign_end) }}
-      </div>
-    </footer>
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th>Visibility</th>
+          <th>Campaign Title</th>
+          <th>Budget</th>
+          <th>Description</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="visibility-icon">
+              <PublicIcon v-if="campaign.campaign_visibility === 'public'" />
+              <PrivateIcon v-else />
+            </div>
+            {{ campaign.campaign_visibility }}
+          </td>
+          <td>{{ campaign.campaign_name }}</td>
+          <td>INR {{ campaign.campaign_budget }}</td>
+          <td>{{ campaign.campaign_desc }}</td>
+          <td>{{ formatDate(campaign.campaign_start) }}</td>
+          <td>{{ formatDate(campaign.campaign_end) }}</td>
+          <td>
+            <button @click="openEditModal" class="btn btn-primary m-2">
+              <PencilSharp class="edit-icon" />
+            </button>
+            <button @click="deleteCampaign(campaign.id)" class="btn btn-danger m-2">
+              <TrashOutline class="delete-icon" />
+            </button>
+            <button @click="viewCampaign(campaign.id)" class="btn btn-info m-2">
+              View
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- Edit Modal -->
     <transition name="fade">
@@ -88,8 +82,8 @@
                 <input class="form-check-input" type="checkbox" v-model="editVisibility" id="editVisibility" />
               </div>
 
-              <!-- Influencer Dropdown (only visible if private) -->
-              <div v-if="!editVisibility" class="mb-3">
+              <!-- Influencer Dropdown -->
+              <div class="mb-3">
                 <label for="editInfluencer" class="form-label">Select Influencer</label>
                 <select v-model="editInfluencer" class="form-select" id="editInfluencer">
                   <option v-for="influencer in influencers" :key="influencer.id" :value="influencer.id">
@@ -127,7 +121,6 @@
             <p><strong>End Date:</strong> {{ formatDate(viewCampaignData.campaign_end) }}</p>
             <p><strong>Influencer:</strong> {{ viewCampaignData.influencer?.name || 'N/A' }}</p>
             <p><strong>Goal:</strong> {{ viewCampaignData.campaign_goal }}</p>
-            <p><strong>Status:</strong> {{ viewCampaignData.campaign_status }}</p> <!-- Display status here -->
           </div>
         </div>
       </div>
@@ -137,11 +130,9 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import '../assets/campaign-card.css';
-
-import { PencilSharp, TrashOutline, CloseOutline, GlobeOutline, LockClosedOutline } from '@vicons/ionicons5'
+import { PencilSharp, TrashOutline, CloseIcon, PublicIcon, PrivateIcon } from '@vicons/ionicons5'
 import axios from 'axios'
-import { useUserStore } from '@/stores/user';
+import { useUserStore } from '@/stores/user'
 
 // Convert timestamp to YYYY-MM-DD format
 const formatDate = (timestamp) => {
@@ -156,37 +147,23 @@ const props = defineProps({
 })
 
 const open = ref(false)
-const startDateError = ref(null)
-const endDateError = ref(null)
-const influencers = ref([])
+const viewOpen = ref(false)
 const editTitle = ref(props.campaign.campaign_name)
 const editDescription = ref(props.campaign.campaign_desc)
 const editBudget = ref(props.campaign.campaign_budget)
 const editStartDate = ref(formatDate(props.campaign.campaign_start))
 const editEndDate = ref(formatDate(props.campaign.campaign_end))
 const editVisibility = ref(props.campaign.campaign_visibility === 'public')
-const editInfluencer = ref(props.campaign.influencer_id) // Prepopulate with current influencer ID
+const editInfluencer = ref(props.campaign.influencer_id)
 const editGoal = ref(props.campaign.campaign_goal)
-const emit = defineEmits(['campaign-fetch'])
-const handleError = ref(null) // This should be a ref holding error messages
-const viewOpen = ref(false) // Modal state for view
-const viewCampaignData = ref({}) // Data for the campaign being viewed
+const viewCampaignData = ref({})
+const startDateError = ref(null)
+const endDateError = ref(null)
 
-const openEditModal = () => {
-  open.value = true
-}
+const openEditModal = () => { open.value = true }
+const closeEditModal = () => { open.value = false }
+const closeViewModal = () => { viewOpen.value = false }
 
-const closeEditModal = () => {
-  open.value = false
-}
-
-const openViewModal = () => {
-  open.value = true
-}
-
-const closeViewModal = () => {
-  viewOpen.value = false
-}
 const validateDates = () => {
   if (editStartDate.value && editEndDate.value) {
     if (new Date(editStartDate.value) > new Date(editEndDate.value)) {
@@ -202,104 +179,95 @@ const validateDates = () => {
 watch([editStartDate, editEndDate], validateDates)
 
 const handleEditSubmit = async () => {
-  if (startDateError.value || endDateError.value) {
-    return
-  }
-  
-  console.log("Campaign before changes:", props.campaign)
-  
-  try {
-    await updateCampaign()
-    closeEditModal()
-    await fetchMyActiveCampaigns()
-  } catch (error) {
-    handleError.value = 'Failed to update campaign: ' + error.message // Set error message here
-  }
+  if (startDateError.value || endDateError.value) return
+  await updateCampaign()
+  closeEditModal()
+  emit('campaign-fetch')
 }
 
 const updateCampaign = async () => {
-  const userStore = useUserStore();
-  
-  try {
-    // Prepare the payload including influencer ID
-    const payload = {
-      name: editTitle.value,
-      description: editDescription.value,
-      budget: editBudget.value,
-      start_date: editStartDate.value,
-      end_date: editEndDate.value,
-      visibility: editVisibility.value ? 'public' : 'private',
-      influencer_id: editInfluencer.value, // Now passing influencer_id
-      goal: editGoal.value
-    };
-
-    console.log("Campaign after changes:", payload)
-
-    const token = userStore.token;
-    if (!token) {
-      throw new Error('Authorization token is missing');
-    }
-
-    await axios.put(`http://localhost:5000/campaigns/${props.campaign.id}`, payload, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    emit('campaign-fetch');
-    console.log('Campaign updated successfully');
-  } catch (error) {
-    console.error('Failed to update campaign:', error);
-    handleError.value = 'Failed to update campaign: ' + error.message // Set error message here
+  const userStore = useUserStore()
+  const token = userStore.token
+  const payload = {
+    name: editTitle.value,
+    description: editDescription.value,
+    budget: editBudget.value,
+    start_date: editStartDate.value,
+    end_date: editEndDate.value,
+    visibility: editVisibility.value ? 'public' : 'private',
+    influencer_id: editInfluencer.value,
+    goal: editGoal.value
   }
-};
+  await axios.put(`http://localhost:5000/campaigns/${props.campaign.id}`, payload, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+}
 
-// Fetch campaign details when "View" button is clicked
 const viewCampaign = async (id) => {
   const userStore = useUserStore()
   const token = userStore.token
-  try {
-    const response = await axios.get(`http://localhost:5000/campaigns/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    viewCampaignData.value = response.data
-    viewOpen.value = true // Open the view modal
-  } catch (error) {
-    console.error('Failed to fetch campaign:', error)
-  }
+  const response = await axios.get(`http://localhost:5000/campaigns/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  viewCampaignData.value = response.data
+  viewOpen.value = true
 }
 
-onMounted(() => {
-  fetchInfluencers(); // Fetch influencers on mount
-})
-
-const fetchInfluencers = async () => {
-  const userStore = useUserStore();
-  const token = userStore.token;
-  try {
-    const response = await axios.get('http://localhost:5000/influencers', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    influencers.value = response.data;
-  } catch (error) {
-    console.error('Failed to fetch influencers:', error);
-    handleError.value = 'Failed to fetch influencers: ' + error.message // Set error message here
-  }
-};
-
-watch(() => props.campaign, (newVal) => {
-  editTitle.value = newVal.campaign_name
-  editDescription.value = newVal.campaign_desc
-  editBudget.value = newVal.campaign_budget
-  editStartDate.value = formatDate(newVal.campaign_start)
-  editEndDate.value = formatDate(newVal.campaign_end)
-  editVisibility.value = newVal.campaign_visibility === 'public'
-  editInfluencer.value = newVal.influencer_id // Ensure it updates the influencer ID, not name
-  editGoal.value = newVal.campaign_goal
-}, { deep: true })
+const deleteCampaign = async (id) => {
+  const userStore = useUserStore()
+  const token = userStore.token
+  await axios.delete(`http://localhost:5000/campaigns/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  emit('campaign-fetch')
+}
 </script>
 
+<style scoped>
+/* Styles for responsiveness and appearance */
+.table-responsive {
+  margin: 1rem 0;
+}
+
+.visibility-icon {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+thead th {
+  background-color: #2d3e50; /* Adjust based on your theme */
+  color: white;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+}
+
+.edit-icon {
+  color: white;
+}
+
+.delete-icon {
+  color: white;
+}
+
+.close-icon {
+  color: black;
+}
+</style>

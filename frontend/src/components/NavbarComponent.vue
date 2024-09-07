@@ -15,7 +15,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
+          <div class="navbar-nav ms-auto">
             <template v-if="!isAuthenticated">
               <!-- Show these links only when the user is not authenticated -->
               <a class="nav-link" href="/login">Login</a>
@@ -72,22 +72,45 @@ const logoutUser = () => {
   router.push('/login');
 };
 </script>
-
 <style scoped>
 .nav-link {
-  color: #007bff;
-  transition: color 0.3s ease, background-color 0.3s ease;
+  color: #006a4e; /* Bootstrap primary color */
+  transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
 }
 
 .nav-link:hover {
   color: #fff;
-  background-color: #007bff;
+  background-color: #006a4e;
   text-decoration: none;
   border-radius: 4px;
+  transform: scale(1.1); /* Slightly increase size on hover */
+}
+
+.navbar-nav .nav-link {
+  margin-right: 1rem; /* Gap between nav items */
+}
+
+.navbar-nav .nav-link:last-child {
+  margin-right: 0; /* Remove gap for the last item */
 }
 
 .nav-link {
-  padding: 0.5rem 2rem;
-  margin: 1rem;
+  padding: 0.5rem 1rem; /* Adjusted padding */
+}
+
+.navbar-nav {
+  margin-left: auto; /* Pushes the items to the right */
+}
+
+.navbar-toggler {
+  border: none;
+}
+
+.container-fluid {
+  padding: 0;
+}
+
+.navbar {
+  padding: 0.5rem 1rem; /* Adjusted padding for the navbar */
 }
 </style>

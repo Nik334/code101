@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import CampaignCard from '@/components/CampaignCard.vue'
+import CampaignCard from '@/components/AdminCampaignCard.vue'
 import NavbarComponent from '@/components/NavbarComponent.vue'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'

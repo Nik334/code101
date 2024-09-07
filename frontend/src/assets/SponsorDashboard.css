@@ -1,0 +1,174 @@
+/* Global Styles */
+.container {
+  max-width: 50rem; /* 800px equivalent */
+}
+
+.card {
+  border-radius: 0.9375rem; /* 15px equivalent */
+  background-color: #f8f9fa; /* Light background color */
+  color: #000; /* Text color */
+}
+
+.text-bottle-green {
+  color: #006a4e; /* Bottle green color */
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+p {
+  font-size: 1.2rem;
+}
+
+.box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Button Styles */
+.export-btn,
+.add-campaign-btn,
+.btn-primary {
+  border-radius: 0.3125rem; /* 5px equivalent */
+  padding: 0.625rem 0.9375rem; /* 10px 15px equivalent */
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.export-btn {
+  border: solid 0.3125rem #006a4e; /* 5px equivalent, bottle green border */
+  background-color: white;
+  color: #006a4e; /* Bottle green text */
+}
+
+.export-btn:hover {
+  background-color: #006a4e;
+  color: white;
+}
+
+.add-campaign-btn {
+  background-color: #006a4e;
+  border: none;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 0.25rem 0.9375rem rgba(0, 106, 78, 0.5);
+  transition: transform 0.2s;
+}
+
+.add-campaign-btn:hover {
+  transform: scale(1.05);
+  background-color: #004d3a;
+}
+
+.btn-primary {
+  background-color: #006a4e;
+  border: none;
+  box-shadow: 0 0.25rem 0.625rem rgba(0, 106, 78, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: #004d3a;
+}
+
+/* Edit Profile Button */
+.edit-profile-btn {
+  border: none;
+  background-color: transparent;
+  color: #006a4e; /* Bottle green color */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.625rem 0.9375rem; /* 10px 15px equivalent */
+  transition: color 0.3s;
+}
+
+.edit-profile-btn:hover {
+  color: #004a39; /* Darker bottle green */
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 1.25rem; /* 20px equivalent */
+  border-radius: 0.5rem; /* 8px equivalent */
+  max-width: 31.25rem; /* 500px equivalent */
+  width: 100%;
+}
+
+/* Custom styles for the profile update card */
+.card.custom-card {
+  background-color: #006a4e; /* Bottle green background color */
+  border: 0.125rem solid black; /* 2px equivalent */
+  color: white; /* Ensure text is readable */
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.card-header .card-title {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.card.custom-card .form-control,
+.card.custom-card .form-select {
+  background-color: white; /* Keep input fields white */
+  color: black; /* Black text color in input fields */
+}
+
+.card.custom-card .form-label {
+  color: white; /* White text for labels */
+}
+
+.card.custom-card .btn-primary {
+  background-color: black; /* Black button background */
+  border-color: black; /* Black button border */
+}
+
+.card.custom-card .btn-primary:hover {
+  background-color: #333; /* Darker shade for hover */
+}
+
+.error-text {
+  color: red; /* Error text styling */
+}
+
+.campaign-container {
+  padding: 1rem;
+  background-color: #f8f9fa;
+}
+
+.offcanvas-header {
+  background-color: #006a4e;
+  color: white;
+}
+
+.offcanvas-body {
+  background-color: #ffffff;
+  padding: 1.25rem; /* 20px equivalent */
+  border-radius: 0.9375rem; /* 15px equivalent */
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.1);
+}
+
+.form-control {
+  border-radius: 0.625rem; /* 10px equivalent */
+}

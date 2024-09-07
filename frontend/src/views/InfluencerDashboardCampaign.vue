@@ -15,7 +15,7 @@
       />
       <div class="row">
         <div v-for="campaign in searchedCampaigns" :key="campaign.id" class="col-md-6 mb-4">
-          <CampaignCard :campaign="campaign" />
+          <CampaignCard :campaign="campaign" @campaign-fetch="fetchPrivateInfluencerCampaigns"  />
         </div>
       </div>
     </div>
@@ -28,7 +28,8 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 import router from '@/router'
-import CampaignCard from '@/components/CampaignCard.vue'
+import CampaignCard from '@/components/InfluencerCampaignCard.vue'
+import { defineEmits } from 'vue'
 
 const userStore = useUserStore()
 const { token } = storeToRefs(userStore)
@@ -42,9 +43,9 @@ const searchedCampaigns = computed(() => {
   })
 })
 
-const fetchPublicCampaigns = async () => {
+const fetchPrivateInfluencerCampaigns = async () => {
   await axios
-    .get('http://localhost:5000/public-campaigns', {
+    .get('http://localhost:5000/private-influencer-campaigns', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -61,7 +62,7 @@ onMounted(() => {
   if (!token) {
     router.push({ name: 'login' })
   }
-  fetchPublicCampaigns()
+  fetchPrivateInfluencerCampaigns()
 })
 </script>
 
