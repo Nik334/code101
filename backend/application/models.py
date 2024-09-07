@@ -2,6 +2,7 @@ from .database import db
 from datetime import datetime
 from pytz import timezone
 from flask import url_for
+from enum import Enum
 
 class Users(db.Model):
     __tablename__="Users"
@@ -62,7 +63,7 @@ class SponsorBio(db.Model):
         }
     
 class Campaigns(db.Model):
-    __tablename__="Campaigns"
+    __tablename__ = "Campaigns"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sponsor_id = db.Column(db.Integer, db.ForeignKey('Sponsor_Bio.id'))
     campaign_name = db.Column(db.String, nullable=False)
@@ -72,9 +73,9 @@ class Campaigns(db.Model):
     campaign_end = db.Column(db.DateTime, nullable=False)
     flagged = db.Column(db.Boolean, default=False)
     campaign_visibility = db.Column(db.Enum('public', 'private'), default='public')
-    influencer_id = db.Column(db.Integer,db.ForeignKey
-    ('Influencer_Bio.id'))
+    influencer_id = db.Column(db.Integer, db.ForeignKey('Influencer_Bio.id'))
     campaign_goal = db.Column(db.String, nullable=False)
+    campaign_status = db.Column(db.String)
     ads = db.relationship("Ads", backref=db.backref("campaign", lazy=True), cascade="all, delete-orphan")
 
     def serialize(self):
@@ -86,10 +87,11 @@ class Campaigns(db.Model):
             'campaign_start': self.campaign_start,
             'campaign_end': self.campaign_end,
             'campaign_visibility': self.campaign_visibility,
-            'influencer_id':self.influencer_id,
-            'campaign_goal': self.campaign_goal
+            'influencer_id': self.influencer_id,
+            'campaign_goal': self.campaign_goal,
+            'campaign_status':  str(self.campaign_status) if self.campaign_status else 'Requested',
         }
-    
+        
 class Ads(db.Model):
     __tablename__="Ads"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

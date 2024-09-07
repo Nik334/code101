@@ -89,12 +89,29 @@ def get_user(id):
 @jwt_required()
 def get_current_user():
     try:
-        user = Users.query.filter_by(email=get_jwt_identity()['email']).first()
-        return jsonify({'user': user.serialize()}), 200
+        user_email = get_jwt_identity()['email']
+        user = Users.query.filter_by(email=user_email).first()
+
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+
+        user_data = user.serialize()
+        
+        if user.user_type == 'influencer':
+            influencer_bio = user.influencer_bio()
+            if influencer_bio:
+                user_data.update({'influencer_bio': influencer_bio.serialize()})
+        elif user.user_type == 'sponsor':
+            sponsor_bio = user.sponsor_bio()
+            if sponsor_bio:
+                user_data.update({'sponsor_bio': sponsor_bio.serialize()})
+
+        return jsonify({'user': user_data}), 200
     except Exception as e:
         print(e)
-        return jsonify({'message': 'Something went wrong'}), 500
-    
+        return jsonify({'message': 'Something went wrong'}), 500    
+
+
 @app.route("/users/approve_sponsor/<int:id>", methods=['PUT'])
 @admin_required
 def approve_sponsor(id):

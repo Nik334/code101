@@ -35,10 +35,8 @@ def create_campaign():
         else:
             return jsonify({'message': 'Sponsor User does not exist'}), 404
     except Exception as e:
-        # Log the exception for debugging
         logging.error("Error occurred while creating campaign", exc_info=True)
         print(e)
-        # Return a generic error message to the client
         return jsonify({'message': 'Something went wrong'}), 500
 
 @app.route('/campaigns', methods=['GET'])
@@ -63,58 +61,97 @@ def get_public_campaigns():
         print(e)
         return jsonify({'message': 'Something went wrong'}), 500
 
+@app.route('/private-influencer-campaigns', methods=['GET'])
+@jwt_required()
+def get_public_influencer_campaigns():
+    try:
+        user_email = get_jwt_identity()['email']
+        user = Users.query.filter_by(email=user_email).first()
+
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+
+        if user.user_type != 'influencer':
+            return jsonify({'message': 'Only influencers can access this resource'}), 403
+        influencer_bio = user.influencer_bio()
+        if not influencer_bio:
+            return jsonify({'message': 'Influencer bio not found'}), 404
+
+        influencer_bio_id = influencer_bio.id
+        campaigns = Campaigns.query.filter_by(
+            campaign_visibility='private',
+            influencer_id=influencer_bio_id  # Match influencer_bio.id with influencer_id in the campaigns
+        ).all()
+        if campaigns:
+            return jsonify([campaign.serialize() for campaign in campaigns]), 200
+        else:
+            return jsonify({'message': 'No campaigns found for this influencer'}), 404
+
+    except Exception as e:
+        return jsonify({'message': 'Something went wrong', 'error': str(e)}), 500
+
 
 @app.route('/campaigns/<int:id>', methods=['GET'])
 def get_campaign(id):
     try:
         campaign = Campaigns.query.filter_by(id=id).first()
         if campaign:
-            return jsonify(campaign.serialize()), 200
+            influencer = InfluencerBio.query.filter_by(id=campaign.influencer_id).first()
+
+            campaign_data = campaign.serialize()
+
+            if influencer:
+                campaign_data['influencer'] = influencer.serialize()
+            else:
+                campaign_data['influencer'] = None
+
+            return jsonify(campaign_data), 200
         else:
             return jsonify({'message': 'Campaign does not exist'}), 404
     except Exception as e:
         print(e)
         return jsonify({'message': 'Something went wrong'}), 500
 
-
 @app.route('/campaigns/<int:id>', methods=['PUT'])
-@sponsor_required
+@jwt_required()  # Assuming you use JWT for authentication
 def update_campaign(id):
     try:
         data = request.get_json()
+
         # Check if data contains all the required fields
         required_fields = ['name', 'description', 'start_date', 'end_date', 'budget', 'visibility', 'goal']
         for field in required_fields:
             if field not in data:
                 return jsonify({'message': f'Missing required field: {field}'}), 400
 
+        # Fetch the campaign by id
         campaign = Campaigns.query.filter_by(id=id).first()
         if not campaign:
             return jsonify({'message': 'Campaign does not exist'}), 404
 
+        # Get the current user and sponsor
         user = get_jwt_identity()
         sponsor = SponsorBio.query.filter_by(user_id=user['user_id']).first()
-        print('inside', user['user_id'])
         if not sponsor:
             return jsonify({'message': 'Sponsor User does not exist'}), 404
-        # Retrieve the username using user_id
+
+        # Ensure the user exists
         user = Users.query.filter_by(id=user['user_id']).first()
         if not user:
             return jsonify({'message': 'User does not exist'}), 404
 
-# new_campaign = Campaigns(sponsor_id=sponsor.id, campaign_name=data['name'], campaign_desc=data['description'], campaign_start=datetime.strptime(
-#                 data['start_date'], "%Y-%m-%d"), campaign_end=datetime.strptime(data['end_date'], "%Y-%m-%d"), campaign_budget=data['budget'], campaign_visibility=data['visibility'], campaign_goal=data['goal'])
         # Update campaign details
         campaign.campaign_name = data['name']
         campaign.campaign_desc = data['description']
         campaign.campaign_start = datetime.strptime(data['start_date'], "%Y-%m-%d")
         campaign.campaign_end = datetime.strptime(data['end_date'], "%Y-%m-%d")
         campaign.campaign_budget = data['budget']
-        campaign.campaign_visibility = data['visibility'],
-        campaign.influencer_id=data['influencer_id'], 
+        campaign.campaign_visibility = data['visibility']
+        campaign.influencer_id = data.get('influencer_id')  # Using .get() to avoid KeyError
         campaign.campaign_goal = data['goal']
 
         db.session.commit()
+
         return jsonify({
             'message': 'Campaign updated successfully',
             'username': user.username  # Include username in response if needed
@@ -123,6 +160,31 @@ def update_campaign(id):
     except Exception as e:
         print(e)
         return jsonify({'message': 'Something went wrong'}), 500
+
+@app.route('/campaigns/<int:id>/status', methods=['PUT'])
+@jwt_required()
+def update_campaign_status(id):
+    try:
+        user_email = get_jwt_identity()['email']
+        user = Users.query.filter_by(email=user_email).first()
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+
+        campaign = Campaigns.query.filter_by(id=id).first()
+        if not campaign:
+            return jsonify({'message': 'Campaign does not exist'}), 404
+
+        data = request.get_json()
+        if 'status' not in data:
+            return jsonify({'message': 'Missing required field: status'}), 400
+
+        campaign.campaign_status = data['status']
+        db.session.commit()
+
+        return jsonify({'message': 'Campaign status updated successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'message': 'Something went wrong', 'error': str(e)}), 500
 
 @app.errorhandler(500)
 def internal_server_error(error):
